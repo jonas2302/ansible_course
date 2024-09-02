@@ -1,0 +1,38 @@
+---
+- hosts: all
+  become: true
+  pre_tasks: 
+
+  - name: install updates for centos
+    ansible.builtin.yum:
+     update_only: yes
+     update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates for Ubuntu
+    ansible.builtin.apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+  tasks:
+  - name: install apache on web servers
+    ansible.builtin.apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+    when: ansible_distribution == "Ubuntu"
+
+
+- hosts: db_servers
+  become: true
+  tasks:
+  - name: install maria_db db servers
+    ansible.builtin.yum:
+      name: mariadb 
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+
