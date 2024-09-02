@@ -4,6 +4,7 @@
   pre_tasks: 
 
   - name: install updates for centos
+    tags: always
     ansible.builtin.yum:
      update_only: yes
      update_cache: yes
@@ -14,19 +15,65 @@
       upgrade: dist
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
+    tags: always
+  - name: copy html file for site
+    tags: apache,ubuntu
+    ansible.builtin.copy: 
+       src: default_site.html
+       dest: /var/www/html/index.html
+       owner: root
+       group: root
+       mode: 0644  
 
 - hosts: web_servers
+  tags: apache,ubuntu
   become: true
   tasks:
-  - name: install apache on web servers
+  - name: ubuntu install apache on web servers
     ansible.builtin.apt:
       name: 
         - apache2
         - libapache2-mod-php
     when: ansible_distribution == "Ubuntu"
 
+  - name: CentOS install apache on web servers
+    ansible.builtin.yum:
+      name: 
+        - httpd
+    when: ansible_distribution == "CentOS"
+  
+  - name: ensure apache is running (ubuntu) 
+    tags: apache,ubuntu
+    ansible.builtin.service:
+      name: apache2
+      state: started
+    when: ansible_distribution == "Ubuntu"
+
+      #  - name: ensure apache is running (CentOS) 
+      #tags: apache,ubuntu
+      #ansible.builtin.service:
+      #name: httpd
+      #state: started
+      #when: ansible_distribution == "CentOS"
+
+  - name: change email address for  
+    tags: apache,CentOS
+    ansible.builtin.lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin testemail@jonaspages.com
+    when: ansible_distribution == "CentOS"
+    register: httpd  
+
+  - name: restart fedora httpd 
+    tags: apache,CentOS
+    ansible.builtin.service:
+      name: httpd
+      state: started
+    when: httpd.changed
 
 - hosts: db_servers
+  tags: db,centos
   become: true
   tasks:
   - name: install maria_db db servers
