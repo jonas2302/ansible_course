@@ -36,6 +36,29 @@
         - libapache2-mod-php
     when: ansible_distribution == "Ubuntu"
 
+  - name: create a user
+    tags: always
+    ansible.builtin.user:
+      name: simone
+      groups: root
+
+  - name: add sudoers for simone
+    tags: always
+    ansible.builtin.copy: 
+      src: sudoer_simone
+      dest: /etc/sudoers.d/simone
+      owner: root
+      group: root
+      mode: 0440
+
+  - name: add ssh key for simone user
+    tags: always
+    ansible.builtin.copy:
+      user: simone
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD2IbVLbIZn3jlFsujJvHU7WfXyxOkNSBJFw0OJT8FjHjrggRBd3kiY2ScRxW/qJQGeo4nffDWi/cAO+zjK+ttiIbdILhNzQ2f7np7o6V1g+TbN+fGF3s6pQAGr1x9qZ8ILDI3PzFXCzxhBC021IeDQDONYlp91rij5i8bknISA2ST9nRHGjdc7SOU7fefyMCKSkz92p8yqfdkpk9odgfGMRgBEaEy/LGvAch+0JXhfAMpSkAQTilj8lSsYnIDYU95+njpo+MATmCe/YJC77dwlsCuGpxoKtbT/gX7oiFil58TuTR52UUVzINRyCT0kv3Sz9vpal2ULBlXG5yQ6VR3MrqJNWH6fOV/8vPMir57M3g8F1o989TyfTUtLveocpF1U0gHmXT9Y1972ikUHbaUl4eo1I2S6r+D5k+Po3nEhuxSRFB2yqbUhuiwR6Eq9JyYAh9M2hYRpjG8oCpqzpcymbsR3T+jFOxHc16tebGnmvyC9Ms6c3QephoxcAmbpxqs= jonas@911d46998f25"
+
+
+
   - name: CentOS install apache on web servers
     ansible.builtin.yum:
       name: 
